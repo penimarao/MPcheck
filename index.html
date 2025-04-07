@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="ja">
 <head>
@@ -88,6 +89,69 @@
   <div id="history"></div>
 
   <script>
+function generateOptions(start, end, step) {
+      let options = '';
+      for (let i = start; i <= end; i += step) {
+        options += `<option value="${i.toFixed(1)}">${i.toFixed(1)}</option>`;
+      }
+      return options;
+    }
+
+    function generateResistanceOptions() {
+      let res = '<option value=">100">>100</option>';
+      for (let i = 90; i >= 10; i -= 10) res += `<option value="${i}">${i}</option>`;
+      for (let i = 10; i >= 5; i--) res += `<option value="${i}">${i}</option>`;
+      for (let i = 4.9; i >= 1.0; i -= 1.0) res += `<option value="${i.toFixed(1)}">${i.toFixed(1)}</option>`;
+      for (let i = 0.9; i >= 0.1; i -= 0.1) res += `<option value="${i.toFixed(1)}">${i.toFixed(1)}</option>`;
+      for (let i = 0.09; i >= 0.01; i -= 0.01) res += `<option value="${i.toFixed(2)}">${i.toFixed(2)}</option>`;
+      return res;
+    }
+
+    document.addEventListener("DOMContentLoaded", function () {
+      ['amp1','amp2'].forEach(id => {
+        const el = document.getElementsByName(id)[0];
+        el.innerHTML = generateOptions(1.0, 10.0, 0.1) + generateOptions(10.5, 20.0, 0.5) + generateOptions(21.0, 40.0, 1.0);
+      });
+      ['total1','total2'].forEach(id => {
+        const el = document.getElementsByName(id)[0];
+        el.innerHTML = generateOptions(0.0, 200.0, 0.1);
+      });
+      ['res1','res2'].forEach(id => {
+        const el = document.getElementsByName(id)[0];
+        el.innerHTML = generateResistanceOptions();
+      });
+    });
+
+const plantToNumbers = {
+      "歌長": ["1", "2", "101", "102"],
+      "湯": ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "101"],
+      "細田": ["1", "101", "102"],
+      "竹田": ["1", "2", "3", "4", "101", "102", "103", "104"],
+      "井土": ["1", "2", "3", "4", "101", "102", "103", "104", "105"],
+      "今岡金屋": ["1", "2", "3", "4", "5", "6", "7", "101", "102", "103", "104"],
+      "千原": ["1", "2", "3", "101", "102", "103"],
+      "鐘尾": ["1", "2", "3", "4", "5", "6", "7", "101", "102"],
+      "千谷": ["1", "2", "3", "4", "5", "101", "102", "103"]
+    };
+
+    document.addEventListener("DOMContentLoaded", function () {
+      const plantSelect = document.getElementById("plant-select");
+      const numberSelect = document.getElementById("number-select");
+
+      plantSelect.addEventListener("change", function () {
+        const selected = this.value;
+        numberSelect.innerHTML = '<option value="">選択してください</option>';
+        if (plantToNumbers[selected]) {
+          plantToNumbers[selected].forEach(num => {
+            const opt = document.createElement("option");
+            opt.value = num;
+            opt.textContent = num;
+            numberSelect.appendChild(opt);
+          });
+        }
+      });
+    });
+
     const plantToNumbers = {
       "井土": ["1","2","3","4","101","102","103","104","105"],
       "今岡金屋": ["1","2","3","4","5","6","7","101","102","103","104"],
