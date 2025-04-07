@@ -124,7 +124,7 @@ document.addEventListener("DOMContentLoaded", () => {
     let res = '<option value=">100">>100</option>';
     for (let i = 90; i >= 10; i -= 10) res += `<option value="${i}">${i}</option>`;
     for (let i = 10; i >= 5; i--) res += `<option value="${i}">${i}</option>`;
-    for (let i = 4.9; i >= 1.0; i -= 1.0) res += `<option value="${i.toFixed(1)}">${i.toFixed(1)}</option>`;
+    for (let i = 4; i >= 1; i--) res += `<option value="${i}">${i}</option>`;
     for (let i = 0.9; i >= 0.1; i -= 0.1) res += `<option value="${i.toFixed(1)}">${i.toFixed(1)}</option>`;
     for (let i = 0.09; i >= 0.01; i -= 0.01) res += `<option value="${i.toFixed(2)}">${i.toFixed(2)}</option>`;
     return res;
