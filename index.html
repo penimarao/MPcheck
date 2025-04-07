@@ -154,6 +154,45 @@
       const entries = JSON.parse(localStorage.getItem('entries') || '[]');
       counter.textContent = entries.length;
       historyDiv.innerHTML = '';
+      entries.forEach((entry, index) => {
+        const div = document.createElement('div');
+        div.className = 'entry';
+        div.innerHTML = `
+          <strong>${entry.timestamp}</strong><br>
+          ポンプ場: ${entry.plant} / 号数: ${entry.number}<br>
+          No.1 - 電流: ${entry.amp1}, 積算: ${entry.total1}, 抵抗: ${entry.res1}<br>
+          No.2 - 電流: ${entry.amp2}, 積算: ${entry.total2}, 抵抗: ${entry.res2}<br>
+          <span class="note">備考: ${entry.note || ''}</span><br>
+          <button onclick="editEntry(${index})">編集</button>
+          <button onclick="deleteEntry(${index})">削除</button>
+        `;
+        historyDiv.appendChild(div);
+      });
+    }
+
+    function editEntry(index) {
+      const entries = JSON.parse(localStorage.getItem('entries') || '[]');
+      const entry = entries[index];
+      Object.keys(entry).forEach(key => {
+        if (form.elements[key]) form.elements[key].value = entry[key];
+        if (form.elements[key]?.type === "checkbox") {
+          form.elements[key].checked = !!entry[key];
+        }
+      });
+      entries.splice(index, 1);
+      localStorage.setItem('entries', JSON.stringify(entries));
+      updateHistory();
+    }
+
+    function deleteEntry(index) {
+      const entries = JSON.parse(localStorage.getItem('entries') || '[]');
+      entries.splice(index, 1);
+      localStorage.setItem('entries', JSON.stringify(entries));
+      updateHistory();
+    }
+      const entries = JSON.parse(localStorage.getItem('entries') || '[]');
+      counter.textContent = entries.length;
+      historyDiv.innerHTML = '';
       entries.forEach(entry => {
         const div = document.createElement('div');
         div.className = 'entry';
