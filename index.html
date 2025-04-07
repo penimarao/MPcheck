@@ -1,9 +1,8 @@
-
 <!DOCTYPE html>
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
-  <title>点検アプリ（全ポンプ場対応）</title>
+  <title>点検アプリ（号数連動＋抵抗選択式）</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <style>
     body { font-family: sans-serif; padding: 1em; }
@@ -19,30 +18,100 @@
     <label>ポンプ場:</label>
     <select name="plant" id="plant-select" required>
       <option value="">選択してください</option>
-      <option value="歌長">歌長</option>
-<option value="湯">湯</option>
-<option value="細田">細田</option>
-<option value="竹田">竹田</option>
-<option value="井土">井土</option>
-<option value="今岡金屋">今岡金屋</option>
-<option value="千原">千原</option>
-<option value="鐘尾">鐘尾</option>
-<option value="千谷">千谷</option>
+      <option value="井土">井土</option><option value="今岡金屋">今岡金屋</option><option value="千原">千原</option><option value="千谷">千谷</option><option value="歌長">歌長</option><option value="湯">湯</option><option value="竹田">竹田</option><option value="細田">細田</option><option value="鐘尾">鐘尾</option>
     </select>
 
     <label>号数:</label>
-    <input type="text" name="number" required>
+    <select name="number" id="number-select" required>
+      <option value="">選択してください</option>
+    </select>
 
     <h3>No.1ポンプ</h3>
     電流値: <input type="text" name="amp1">
     積算計: <input type="text" name="total1">
-    絶縁抵抗: <input type="text" name="res1">
+    絶縁抵抗:
+    <select name="res1">
+      <option value="">選択してください</option>
+      <option value=">100">>100</option>
+<option value="90">90</option>
+<option value="80">80</option>
+<option value="70">70</option>
+<option value="60">60</option>
+<option value="50">50</option>
+<option value="40">40</option>
+<option value="30">30</option>
+<option value="20">20</option>
+<option value="10">10</option>
+<option value="5">5</option>
+<option value="4">4</option>
+<option value="3">3</option>
+<option value="2">2</option>
+<option value="1">1</option>
+<option value="1.0">1.0</option>
+<option value="0.9">0.9</option>
+<option value="0.8">0.8</option>
+<option value="0.7">0.7</option>
+<option value="0.6">0.6</option>
+<option value="0.5">0.5</option>
+<option value="0.4">0.4</option>
+<option value="0.3">0.3</option>
+<option value="0.2">0.2</option>
+<option value="0.1">0.1</option>
+<option value="0.10">0.10</option>
+<option value="0.09">0.09</option>
+<option value="0.08">0.08</option>
+<option value="0.07">0.07</option>
+<option value="0.06">0.06</option>
+<option value="0.05">0.05</option>
+<option value="0.04">0.04</option>
+<option value="0.03">0.03</option>
+<option value="0.02">0.02</option>
+<option value="0.01">0.01</option>
+    </select>
     備考: <input type="text" name="note1">
 
     <h3>No.2ポンプ</h3>
     電流値: <input type="text" name="amp2">
     積算計: <input type="text" name="total2">
-    絶縁抵抗: <input type="text" name="res2">
+    絶縁抵抗:
+    <select name="res2">
+      <option value="">選択してください</option>
+      <option value=">100">>100</option>
+<option value="90">90</option>
+<option value="80">80</option>
+<option value="70">70</option>
+<option value="60">60</option>
+<option value="50">50</option>
+<option value="40">40</option>
+<option value="30">30</option>
+<option value="20">20</option>
+<option value="10">10</option>
+<option value="5">5</option>
+<option value="4">4</option>
+<option value="3">3</option>
+<option value="2">2</option>
+<option value="1">1</option>
+<option value="1.0">1.0</option>
+<option value="0.9">0.9</option>
+<option value="0.8">0.8</option>
+<option value="0.7">0.7</option>
+<option value="0.6">0.6</option>
+<option value="0.5">0.5</option>
+<option value="0.4">0.4</option>
+<option value="0.3">0.3</option>
+<option value="0.2">0.2</option>
+<option value="0.1">0.1</option>
+<option value="0.10">0.10</option>
+<option value="0.09">0.09</option>
+<option value="0.08">0.08</option>
+<option value="0.07">0.07</option>
+<option value="0.06">0.06</option>
+<option value="0.05">0.05</option>
+<option value="0.04">0.04</option>
+<option value="0.03">0.03</option>
+<option value="0.02">0.02</option>
+<option value="0.01">0.01</option>
+    </select>
     備考: <input type="text" name="note2">
 
     <button type="submit">保存</button>
@@ -52,6 +121,24 @@
   <div id="history"></div>
 
   <script>
+    const plantToNumbers = {"井土": ["1", "2", "3", "4", "101", "102", "103", "104", "105"], "今岡金屋": ["1", "2", "3", "4", "5", "6", "7", "101", "102", "103", "104"], "千原": ["1", "2", "3", "101", "102", "103"], "千谷": ["1", "2", "3", "4", "5", "101", "102", "103"], "歌長": ["1", "2", "101", "102"], "湯": ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "101"], "竹田": ["1", "2", "3", "4", "101", "102", "103", "104"], "細田": ["1", "101", "102"], "鐘尾": ["1", "2", "3", "4", "5", "6", "7", "101", "102"]};
+
+    const plantSelect = document.getElementById('plant-select');
+    const numberSelect = document.getElementById('number-select');
+
+    plantSelect.addEventListener('change', function() {
+      const selectedPlant = this.value;
+      numberSelect.innerHTML = '<option value="">選択してください</option>';
+      if (plantToNumbers[selectedPlant]) {
+        plantToNumbers[selectedPlant].forEach(function(num) {
+          const opt = document.createElement('option');
+          opt.value = num;
+          opt.textContent = num;
+          numberSelect.appendChild(opt);
+        });
+      }
+    });
+
     const form = document.getElementById('form');
     const historyDiv = document.getElementById('history');
 
@@ -96,3 +183,5 @@
   </script>
 </body>
 </html>
+
+
