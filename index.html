@@ -4404,6 +4404,17 @@ document.addEventListener("DOMContentLoaded", function () {
       alert("保存データがありません");
       return;
     }
+    
+    const plantOrder = ["歌長", "湯", "細田", "竹田", "井土", "今岡金屋", "千原", "鐘尾", "千谷"];
+    saved.sort((a, b) => {
+      const pA = plantOrder.indexOf(a.plant);
+      const pB = plantOrder.indexOf(b.plant);
+      if (pA !== pB) return pA - pB;
+      const nA = parseInt(a.number);
+      const nB = parseInt(b.number);
+      return nA - nB;
+    });
+
     const rows = [
       ["ポンプ場", "号数", "ポンプNo", "電流値（測定値）", "電流値（定格）", "絶縁抵抗値（MΩ）", "積算計（h）", "判定（良／否）", "備考"]
     ];
