@@ -19,7 +19,7 @@
   <h1>点検フォーム</h1>
   <form id="form">
     <label>ポンプ場:</label>
-    <select id="plant-select" name="plant" required>
+    <select name="plant" id="plant-select" required>
       <option value="">選択してください</option>
       <option value="歌長">歌長</option>
       <option value="湯">湯</option>
@@ -33,7 +33,7 @@
     </select>
 
     <label>号数:</label>
-    <select id="number-select" name="number" required>
+    <select name="number" id="number-select" required>
       <option value="">選択してください</option>
     </select>
 
@@ -70,7 +70,6 @@
       <option value="中">中</option>
       <option value="多">多</option>
     </select>
-    </select>
     <label>備考自由記述:</label>
     <textarea name="noteFree" rows="2" style="width:100%;font-size:1.1em;"></textarea>
       <option value="">未選択</option>
@@ -89,69 +88,6 @@
   <div id="history"></div>
 
   <script>
-function generateOptions(start, end, step) {
-      let options = '';
-      for (let i = start; i <= end; i += step) {
-        options += `<option value="${i.toFixed(1)}">${i.toFixed(1)}</option>`;
-      }
-      return options;
-    }
-
-    function generateResistanceOptions() {
-      let res = '<option value=">100">>100</option>';
-      for (let i = 90; i >= 10; i -= 10) res += `<option value="${i}">${i}</option>`;
-      for (let i = 10; i >= 5; i--) res += `<option value="${i}">${i}</option>`;
-      for (let i = 4.9; i >= 1.0; i -= 1.0) res += `<option value="${i.toFixed(1)}">${i.toFixed(1)}</option>`;
-      for (let i = 0.9; i >= 0.1; i -= 0.1) res += `<option value="${i.toFixed(1)}">${i.toFixed(1)}</option>`;
-      for (let i = 0.09; i >= 0.01; i -= 0.01) res += `<option value="${i.toFixed(2)}">${i.toFixed(2)}</option>`;
-      return res;
-    }
-
-    document.addEventListener("DOMContentLoaded", function () {
-      ['amp1','amp2'].forEach(id => {
-        const el = document.getElementsByName(id)[0];
-        el.innerHTML = generateOptions(1.0, 10.0, 0.1) + generateOptions(10.5, 20.0, 0.5) + generateOptions(21.0, 40.0, 1.0);
-      });
-      ['total1','total2'].forEach(id => {
-        const el = document.getElementsByName(id)[0];
-        el.innerHTML = generateOptions(0.0, 200.0, 0.1);
-      });
-      ['res1','res2'].forEach(id => {
-        const el = document.getElementsByName(id)[0];
-        el.innerHTML = generateResistanceOptions();
-      });
-    });
-
-const plantToNumbers = {
-      "歌長": ["1", "2", "101", "102"],
-      "湯": ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "101"],
-      "細田": ["1", "101", "102"],
-      "竹田": ["1", "2", "3", "4", "101", "102", "103", "104"],
-      "井土": ["1", "2", "3", "4", "101", "102", "103", "104", "105"],
-      "今岡金屋": ["1", "2", "3", "4", "5", "6", "7", "101", "102", "103", "104"],
-      "千原": ["1", "2", "3", "101", "102", "103"],
-      "鐘尾": ["1", "2", "3", "4", "5", "6", "7", "101", "102"],
-      "千谷": ["1", "2", "3", "4", "5", "101", "102", "103"]
-    };
-
-    document.addEventListener("DOMContentLoaded", function () {
-      const plantSelect = document.getElementById("plant-select");
-      const numberSelect = document.getElementById("number-select");
-
-      plantSelect.addEventListener("change", function () {
-        const selected = this.value;
-        numberSelect.innerHTML = '<option value="">選択してください</option>';
-        if (plantToNumbers[selected]) {
-          plantToNumbers[selected].forEach(num => {
-            const opt = document.createElement("option");
-            opt.value = num;
-            opt.textContent = num;
-            numberSelect.appendChild(opt);
-          });
-        }
-      });
-    });
-
     const plantToNumbers = {
       "井土": ["1","2","3","4","101","102","103","104","105"],
       "今岡金屋": ["1","2","3","4","5","6","7","101","102","103","104"],
@@ -164,34 +100,7 @@ const plantToNumbers = {
       "鐘尾": ["1","2","3","4","5","6","7","101","102"]
     };
 
-    
-    const plantToNumbers = {
-      "歌長": ["1", "2", "101", "102"],
-      "湯": ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "101"],
-      "細田": ["1", "101", "102"],
-      "竹田": ["1", "2", "3", "4", "101", "102", "103", "104"],
-      "井土": ["1", "2", "3", "4", "101", "102", "103", "104", "105"],
-      "今岡金屋": ["1", "2", "3", "4", "5", "6", "7", "101", "102", "103", "104"],
-      "千原": ["1", "2", "3", "101", "102", "103"],
-      "鐘尾": ["1", "2", "3", "4", "5", "6", "7", "101", "102"],
-      "千谷": ["1", "2", "3", "4", "5", "101", "102", "103"]
-    };
-
     const plantSelect = document.getElementById('plant-select');
-    const numberSelect = document.getElementById('number-select');
-    plantSelect.addEventListener('change', function () {
-      const selected = this.value;
-      numberSelect.innerHTML = '<option value="">選択してください</option>';
-      if (plantToNumbers[selected]) {
-        plantToNumbers[selected].forEach(num => {
-          const opt = document.createElement('option');
-          opt.value = num;
-          opt.textContent = num;
-          numberSelect.appendChild(opt);
-        });
-      }
-    });
-    
     const numberSelect = document.getElementById('number-select');
 
     plantSelect.addEventListener('change', function () {
@@ -242,51 +151,7 @@ const plantToNumbers = {
     const historyDiv = document.getElementById('history');
     const counter = document.getElementById('counter');
 
-    
     function updateHistory() {
-      const entries = JSON.parse(localStorage.getItem('entries') || '[]');
-      counter.textContent = entries.length;
-      historyDiv.innerHTML = '';
-      entries.forEach((entry, index) => {
-        const div = document.createElement('div');
-        div.className = 'entry';
-        div.innerHTML = `
-          <strong>${entry.timestamp}</strong><br>
-          ポンプ場: ${entry.plant} / 号数: ${entry.number}<br>
-          No.1 - 電流: ${entry.amp1}, 積算: ${entry.total1}, 抵抗: ${entry.res1}<br>
-          No.2 - 電流: ${entry.amp2}, 積算: ${entry.total2}, 抵抗: ${entry.res2}<br>
-          <span class="note">備考: ${entry.note || ''}</span><br>
-          <button onclick="editEntry(${index})">編集</button>
-          <button onclick="deleteEntry(${index})">削除</button>
-        `;
-        historyDiv.appendChild(div);
-      });
-    }
-
-    function editEntry(index) {
-      const entries = JSON.parse(localStorage.getItem('entries') || '[]');
-      const entry = entries[index];
-      Object.keys(entry).forEach(key => {
-        if (form.elements[key]) {
-          if (form.elements[key].type === "checkbox") {
-            form.elements[key].checked = !!entry[key];
-          } else {
-            form.elements[key].value = entry[key];
-          }
-        }
-      });
-      entries.splice(index, 1);
-      localStorage.setItem('entries', JSON.stringify(entries));
-      updateHistory();
-    }
-
-    function deleteEntry(index) {
-      const entries = JSON.parse(localStorage.getItem('entries') || '[]');
-      entries.splice(index, 1);
-      localStorage.setItem('entries', JSON.stringify(entries));
-      updateHistory();
-    }
-    
       const entries = JSON.parse(localStorage.getItem('entries') || '[]');
       counter.textContent = entries.length;
       historyDiv.innerHTML = '';
