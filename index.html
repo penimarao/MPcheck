@@ -18,7 +18,9 @@
   <h2>点検フォーム</h2>
   <form id="form">
     <label>ポンプ場:</label>
-    <select name="plant" id="plant-select" required><option value="">選択してください</option><option value="歌長">歌長</option><option value="湯">湯</option><option value="細田">細田</option><option value="竹田">竹田</option><option value="井土">井土</option><option value="今岡金屋">今岡金屋</option><option value="千原">千原</option><option value="鐘尾">鐘尾</option><option value="千谷">千谷</option>
+    <select name="plant" id="plant-select" required>
+  <option value="">選択してください</option>
+</select>
       <option value="">選択してください</option>
       <option value="井土">井土</option><option value="今岡金屋">今岡金屋</option><option value="千原">千原</option><option value="千谷">千谷</option><option value="歌長">歌長</option><option value="湯">湯</option><option value="竹田">竹田</option><option value="細田">細田</option><option value="鐘尾">鐘尾</option>
     </select>
@@ -4319,6 +4321,16 @@ document.addEventListener("DOMContentLoaded", function () {
   const plantToNumbers = {"井土": ["1", "2", "3", "4", "101", "102", "103", "104", "105"], "今岡金屋": ["1", "2", "3", "4", "5", "6", "7", "101", "102", "103", "104"], "千原": ["1", "2", "3", "101", "102", "103"], "千谷": ["1", "2", "3", "4", "5", "101", "102", "103"], "歌長": ["1", "2", "101", "102"], "湯": ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "101"], "竹田": ["1", "2", "3", "4", "101", "102", "103", "104"], "細田": ["1", "101", "102"], "鐘尾": ["1", "2", "3", "4", "5", "6", "7", "101", "102"]};
   const plantSelect = document.getElementById('plant-select');
   const numberSelect = document.getElementById('number-select');
+
+  plantSelect.append(new Option("歌長", "歌長"));
+    plantSelect.append(new Option("湯", "湯"));
+    plantSelect.append(new Option("細田", "細田"));
+    plantSelect.append(new Option("竹田", "竹田"));
+    plantSelect.append(new Option("井土", "井土"));
+    plantSelect.append(new Option("今岡金屋", "今岡金屋"));
+    plantSelect.append(new Option("千原", "千原"));
+    plantSelect.append(new Option("鐘尾", "鐘尾"));
+    plantSelect.append(new Option("千谷", "千谷"));
 
   plantSelect.addEventListener('change', function () {
     const selected = this.value;
