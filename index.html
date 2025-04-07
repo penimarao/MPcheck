@@ -4373,7 +4373,10 @@
     <label>備考（No.2）:</label><input type="text" name="note2">
     <button type="submit">保存</button>
     <button type="button" onclick="downloadCSV()">CSVダウンロード</button>
-  </form>
+  
+    <button type="button" onclick="confirmDeleteAll()">すべて削除</button>
+    </form>
+    
 
   <h2>保存履歴</h2>
   <div><strong>保存件数: <span id="counter">0</span> 件</strong></div><div id="history"></div>
@@ -4400,7 +4403,31 @@
     const form = document.getElementById('form');
     const historyDiv = document.getElementById('history');
 
+    
     form.addEventListener('submit', function(e) {
+      e.preventDefault();
+      const data = Object.fromEntries(new FormData(form));
+      const saved = JSON.parse(localStorage.getItem('pumpData') || '[]');
+
+      // 登録済みチェック
+      const exists = saved.some(d => d.plant === data.plant && d.number === data.number);
+      if (exists) {
+        alert("※登録済みです");
+        return;
+      }
+
+      // 絶縁抵抗値チェック
+      if (parseFloat(data.res1) <= 10) data.note1 = (data.note1 ? data.note1 + " / " : "") + "絶縁抵抗値低";
+      if (parseFloat(data.res2) <= 10) data.note2 = (data.note2 ? data.note2 + " / " : "") + "絶縁抵抗値低";
+
+      data.timestamp = new Date().toLocaleString();
+      saved.unshift(data);
+      localStorage.setItem('pumpData', JSON.stringify(saved));
+      alert("保存しました！");
+      form.reset();
+      showHistory();
+    });
+    
       e.preventDefault();
       const data = Object.fromEntries(new FormData(form));
       data.timestamp = new Date().toLocaleString();
@@ -4422,7 +4449,11 @@
     
     });
 
+    
     function showHistory() {
+      const saved = JSON.parse(localStorage.getItem('pumpData') || '[]');
+      document.getElementById("counter").textContent = saved.length;
+    
       const saved = JSON.parse(localStorage.getItem('pumpData') || '[]');
       historyDiv.innerHTML = '';
       saved.forEach((entry, i) => {
@@ -4458,6 +4489,49 @@
     }
 
     function downloadCSV() {
+  const saved = JSON.parse(localStorage.getItem('pumpData') || '[]');
+  if (!saved.length) {
+    alert("保存データがありません");
+    return;
+  }
+  const rows = [
+    ["ポンプ場", "号数", "ポンプNo", "電流値（測定値）", "電流値（定格）", "絶縁抵抗値（MΩ）", "積算計（h）", "判定（良／否）", "備考"]
+  ];
+
+  saved.forEach(entry => {
+    rows.push([
+      entry.plant,
+      entry.number,
+      "No.1",
+      entry.amp1 || "",
+      "",
+      entry.res1 || "",
+      entry.total1 || "",
+      "",
+      entry.note1 || ""
+    ]);
+    rows.push([
+      entry.plant,
+      entry.number,
+      "No.2",
+      entry.amp2 || "",
+      "",
+      entry.res2 || "",
+      entry.total2 || "",
+      "",
+      entry.note2 || ""
+    ]);
+  });
+
+  const csvContent = rows.map(r => r.join(",")).join("\n");
+  const blob = new Blob([csvContent], { type: "text/csv" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "点検データ.csv";
+  a.click();
+  URL.revokeObjectURL(url);
+}
       const saved = JSON.parse(localStorage.getItem('pumpData') || '[]');
       if (!saved.length) {
         alert("保存データがありません");
