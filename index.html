@@ -2,245 +2,110 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>点検フォーム</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
     body { font-family: sans-serif; padding: 1em; }
-    select, input, textarea { width: 100%; font-size: 1.1em; padding: 6px; margin: 5px 0; }
-    .row { display: flex; gap: 1em; flex-wrap: wrap; }
+    select, input, button { font-size: 1.1em; margin: 0.3em 0; }
+    .row { display: flex; gap: 10px; flex-wrap: wrap; }
     .column { flex: 1; min-width: 150px; }
-    .entry { border: 1px solid #ccc; padding: 10px; margin: 10px 0; }
-    .note { font-weight: bold; margin-top: 0.5em; display: block; }
+    button { padding: 0.5em 1em; }
   </style>
 </head>
 <body>
   <h1>点検フォーム</h1>
   <form id="form">
-    <label>ポンプ場:</label>
-    <select id="plant-select" name="plant" required>
-      <option value="">選択してください</option>
-      <option value="歌長">歌長</option>
-      <option value="湯">湯</option>
-      <option value="細田">細田</option>
-      <option value="竹田">竹田</option>
-      <option value="井土">井土</option>
-      <option value="今岡金屋">今岡金屋</option>
-      <option value="千原">千原</option>
-      <option value="鐘尾">鐘尾</option>
-      <option value="千谷">千谷</option>
-    </select>
-
-    <label>号数:</label>
-    <select id="number-select" name="number" required>
-      <option value="">選択してください</option>
-    </select>
+    <label>ポンプ場:
+      <select name="plant" id="plant-select" required>
+        <option value="">選択してください</option>
+        <option value="歌長">歌長</option>
+        <option value="湯">湯</option>
+        <option value="細田">細田</option>
+        <option value="竹田">竹田</option>
+        <option value="井土">井土</option>
+        <option value="今岡金屋">今岡金屋</option>
+        <option value="千原">千原</option>
+        <option value="鐘尾">鐘尾</option>
+        <option value="千谷">千谷</option>
+      </select>
+    </label><br/>
+    <label>号数:
+      <select name="number" id="number-select" required>
+        <option value="">選択してください</option>
+      </select>
+    </label><br/>
 
     <div class="row">
       <div class="column">
         <h3>No.1ポンプ</h3>
-        <label>電流値:</label><select id="amp1" name="amp1"></select>
-        <label>積算:</label><select id="total1" name="total1"></select>
-        <label>絶縁抵抗:</label><select id="res1" name="res1"></select>
+        電流値: <select name="amp1"></select><br/>
+        積算計: <select name="sum1"></select><br/>
+        絶縁抵抗: <select name="resist1"></select><br/>
+        異音あり: <input type="checkbox" id="noise1"><br/>
       </div>
       <div class="column">
         <h3>No.2ポンプ</h3>
-        <label>電流値:</label><select id="amp2" name="amp2"></select>
-        <label>積算:</label><select id="total2" name="total2"></select>
-        <label>絶縁抵抗:</label><select id="res2" name="res2"></select>
+        電流値: <select name="amp2"></select><br/>
+        積算計: <select name="sum2"></select><br/>
+        絶縁抵抗: <select name="resist2"></select><br/>
+        異音あり: <input type="checkbox" id="noise2"><br/>
       </div>
     </div>
 
-    <div class="row">
-      <label><input type="checkbox" name="sound1"> No.1 異音あり</label>
-      <label><input type="checkbox" name="sound2"> No.2 異音あり</label>
-    </div>
+    スカム: 
+    <select id="scum">
+      <option value="">選択なし</option>
+      <option value="スカム(少)">少</option>
+      <option value="スカム(中)">中</option>
+      <option value="スカム(多)">多</option>
+    </select><br/>
+    油脂: 
+    <select id="oil">
+      <option value="">選択なし</option>
+      <option value="油脂(少)">少</option>
+      <option value="油脂(中)">中</option>
+      <option value="油脂(多)">多</option>
+    </select><br/>
 
-    <label>スカム:</label>
-    <select name="scum">
-      <option value="">未選択</option>
-      <option value="少">少</option>
-      <option value="中">中</option>
-      <option value="多">多</option>
-    </select>
-
-    <label>油脂:</label>
-    <select name="oil">
-      <option value="">未選択</option>
-      <option value="少">少</option>
-      <option value="中">中</option>
-      <option value="多">多</option>
-    </select>
-
-    <label>備考（自由記述）:</label>
-    <textarea name="noteFree" rows="2"></textarea>
+    備考: <input type="text" id="free-note"><br/>
 
     <button type="submit">保存</button>
     <button type="button" onclick="downloadCSV()">CSVダウンロード</button>
     <button type="button" onclick="confirmDeleteAll()">すべて削除</button>
   </form>
 
-  <h2>保存履歴 <span id="counter">0</span> 件</h2>
+  <h2>保存履歴</h2>
+  <div><strong>保存件数: <span id="counter">0</span> 件</strong></div>
   <div id="history"></div>
 
-<script>
-document.addEventListener("DOMContentLoaded", () => {
-  const plantToNumbers = {
-    "歌長": ["1", "2", "101", "102"],
-    "湯": ["1","2","3","4","5","6","7","8","9","10","11","12","13","101"],
-    "細田": ["1","101","102"],
-    "竹田": ["1","2","3","4","101","102","103","104"],
-    "井土": ["1","2","3","4","101","102","103","104","105"],
-    "今岡金屋": ["1","2","3","4","5","6","7","101","102","103","104"],
-    "千原": ["1","2","3","101","102","103"],
-    "鐘尾": ["1","2","3","4","5","6","7","101","102"],
-    "千谷": ["1","2","3","4","5","101","102","103"]
-  };
+  <script>
+    const plantToNumbers = {
+      "歌長": ["1", "2", "101", "102"],
+      "湯": ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "101"],
+      "細田": ["1", "101", "102"],
+      "竹田": ["1", "2", "3", "4", "101", "102", "103", "104"],
+      "井土": ["1", "2", "3", "4", "101", "102", "103", "104", "105"],
+      "今岡金屋": ["1", "2", "3", "4", "5", "6", "7", "101", "102", "103", "104"],
+      "千原": ["1", "2", "3", "101", "102", "103"],
+      "鐘尾": ["1", "2", "3", "4", "5", "6", "7", "101", "102"],
+      "千谷": ["1", "2", "3", "4", "5", "101", "102", "103"]
+    };
 
-  const plantSelect = document.getElementById("plant-select");
-  const numberSelect = document.getElementById("number-select");
-  plantSelect.addEventListener("change", function () {
-    const selected = this.value;
-    numberSelect.innerHTML = '<option value="">選択してください</option>';
-    if (plantToNumbers[selected]) {
-      plantToNumbers[selected].forEach(num => {
-        const opt = document.createElement("option");
-        opt.value = num;
-        opt.textContent = num;
-        numberSelect.appendChild(opt);
-      });
-    }
-  });
-
-  function generateOptions(start, end, step) {
-    let opts = "";
-    for (let i = start; i <= end; i += step) {
-      opts += `<option value="${i.toFixed(1)}">${i.toFixed(1)}</option>`;
-    }
-    return opts;
-  }
-
-  function generateResistanceOptions() {
-    let res = '<option value=">100">>100</option>';
-    for (let i = 90; i >= 10; i -= 10) res += `<option value="${i}">${i}</option>`;
-    for (let i = 9; i >= 5; i--) res += `<option value="${i}">${i}</option>`;
-    for (let i = 4; i >= 1; i--) res += `<option value="${i}">${i}</option>`;
-    for (let i = 0.9; i >= 0.1; i -= 0.1) res += `<option value="${i.toFixed(1)}">${i.toFixed(1)}</option>`;
-    for (let i = 0.09; i >= 0.01; i -= 0.01) res += `<option value="${i.toFixed(2)}">${i.toFixed(2)}</option>`;
-    return res;
-  }
-
-  document.getElementById("amp1").innerHTML = generateOptions(1.0, 10.0, 0.1) + generateOptions(10.5, 20.0, 0.5) + generateOptions(21.0, 40.0, 1.0);
-  document.getElementById("amp2").innerHTML = document.getElementById("amp1").innerHTML;
-  document.getElementById("total1").innerHTML = generateOptions(0, 200, 0.1);
-  document.getElementById("total2").innerHTML = document.getElementById("total1").innerHTML;
-  document.getElementById("res1").innerHTML = generateResistanceOptions();
-  document.getElementById("res2").innerHTML = document.getElementById("res1").innerHTML;
-
-  const form = document.getElementById("form");
-  const historyDiv = document.getElementById("history");
-  const counter = document.getElementById("counter");
-
-  form.addEventListener("submit", function(e) {
-    e.preventDefault();
-    const data = Object.fromEntries(new FormData(form).entries());
-    const notes = [];
-    if (parseFloat(data.res1) <= 10) notes.push("No.1絶縁低下");
-    if (parseFloat(data.res2) <= 10) notes.push("No.2絶縁低下");
-    if (form.sound1.checked) notes.push("No.1異音");
-    if (form.sound2.checked) notes.push("No.2異音");
-    if (data.scum) notes.push(`スカム（${data.scum}）`);
-    if (data.oil) notes.push(`油脂（${data.oil}）`);
-    if (data.noteFree) notes.push(data.noteFree);
-    data.note = notes.join(" ");
-    data.timestamp = new Date().toLocaleString();
-
-    const entries = JSON.parse(localStorage.getItem("entries") || "[]");
-    const duplicate = entries.find(e => e.plant === data.plant && e.number === data.number);
-    if (duplicate) {
-      alert("※登録済みです");
-      return;
-    }
-
-    entries.push(data);
-    localStorage.setItem("entries", JSON.stringify(entries));
-    updateHistory();
-    form.reset();
-  });
-
-  function updateHistory() {
-    const entries = JSON.parse(localStorage.getItem("entries") || "[]");
-    counter.textContent = entries.length;
-    historyDiv.innerHTML = '';
-    entries.forEach((entry, index) => {
-      const div = document.createElement("div");
-      div.className = "entry";
-      div.innerHTML = `
-        <strong>${entry.timestamp}</strong><br>
-        ポンプ場: ${entry.plant} / 号数: ${entry.number}<br>
-        No.1 - 電流: ${entry.amp1}, 積算: ${entry.total1}, 抵抗: ${entry.res1}<br>
-        No.2 - 電流: ${entry.amp2}, 積算: ${entry.total2}, 抵抗: ${entry.res2}<br>
-        <span class="note">備考: ${entry.note || ""}</span>
-        <button onclick="editEntry(${index})">編集</button>
-        <button onclick="deleteEntry(${index})">削除</button>
-      `;
-      historyDiv.appendChild(div);
-    });
-  }
-
-  window.editEntry = function(index) {
-    const entries = JSON.parse(localStorage.getItem("entries") || "[]");
-    const entry = entries[index];
-    Object.keys(entry).forEach(key => {
-      if (form.elements[key]) {
-        if (form.elements[key].type === "checkbox") {
-          form.elements[key].checked = !!entry[key];
-        } else {
-          form.elements[key].value = entry[key];
-        }
+    const plantSelect = document.getElementById('plant-select');
+    const numberSelect = document.getElementById('number-select');
+    plantSelect.addEventListener('change', function() {
+      const selected = this.value;
+      numberSelect.innerHTML = '<option value="">選択してください</option>';
+      if (plantToNumbers[selected]) {
+        plantToNumbers[selected].forEach(num => {
+          const opt = document.createElement('option');
+          opt.value = num;
+          opt.textContent = num;
+          numberSelect.appendChild(opt);
+        });
       }
     });
-    entries.splice(index, 1);
-    localStorage.setItem("entries", JSON.stringify(entries));
-    updateHistory();
-  }
-
-  window.deleteEntry = function(index) {
-    const entries = JSON.parse(localStorage.getItem("entries") || "[]");
-    entries.splice(index, 1);
-    localStorage.setItem("entries", JSON.stringify(entries));
-    updateHistory();
-  }
-
-  window.confirmDeleteAll = function() {
-    if (confirm("本当に削除しますか？") && confirm("本当に本当に削除しますか？")) {
-      localStorage.removeItem("entries");
-      updateHistory();
-    }
-  }
-
-  window.downloadCSV = function() {
-    const entries = JSON.parse(localStorage.getItem("entries") || "[]");
-    let csv = "ポンプ場,号数,No.,電流値,積算,絶縁抵抗値,備考,電流値（定格）,判定（良／否）\n";
-    entries.forEach(e => {
-      ["No.1", "No.2"].forEach((label, i) => {
-        const row = [
-          e.plant, e.number, label,
-          e[`amp${i+1}`], e[`total${i+1}`], e[`res${i+1}`],
-          i === 0 ? e.note : "", "", ""
-        ];
-        csv += row.join(",") + "\n";
-      });
-    });
-    const blob = new Blob(["\uFEFF" + csv], { type: "text/csv" });
-    const link = document.createElement("a");
-    link.href = URL.createObjectURL(blob);
-    link.download = "tenken_data.csv";
-    link.click();
-  }
-
-  updateHistory();
-});
-</script>
+  </script>
 </body>
 </html>
