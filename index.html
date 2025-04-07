@@ -51,8 +51,10 @@
       </div>
     </div>
 
-    <label><input type="checkbox" name="sound1"> No.1 異音あり</label><br>
-    <label><input type="checkbox" name="sound2"> No.2 異音あり</label><br>
+    <div class="row">
+      <label><input type="checkbox" name="sound1"> No.1 異音あり</label>
+      <label><input type="checkbox" name="sound2"> No.2 異音あり</label>
+    </div>
     <label>スカム:</label>
     <select name="scum">
       <option value="">未選択</option>
@@ -62,6 +64,9 @@
     </select>
     <label>油脂:</label>
     <select name="oil">
+    </select>
+    <label>備考自由記述:</label>
+    <textarea name="noteFree" rows="2" style="width:100%;font-size:1.1em;"></textarea>
       <option value="">未選択</option>
       <option value="少">少</option>
       <option value="中">中</option>
@@ -169,6 +174,7 @@
       if (form.sound2.checked) notes.push("No.2異音");
       if (data.scum) notes.push(`スカム（${data.scum}）`);
       if (data.oil) notes.push(`油脂（${data.oil}）`);
+      if (data.noteFree) notes.push(data.noteFree);
       data.note = notes.join(" ");
       data.timestamp = new Date().toLocaleString();
 
