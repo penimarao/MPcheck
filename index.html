@@ -6,7 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <style>
     body { font-family: sans-serif; padding: 1em; }
-    select, input { width: 100%; }
+    select, input { width: 100%; font-size: 1.1em; padding: 6px; }
     .row { display: flex; gap: 10px; flex-wrap: wrap; }
     .column { flex: 1; min-width: 150px; }
     button { width: 100%; padding: 10px; margin-top: 1em; }
@@ -4376,7 +4376,7 @@
   </form>
 
   <h2>保存履歴</h2>
-  <div id="history"></div>
+  <div><strong>保存件数: <span id="counter">0</span> 件</strong></div><div id="history"></div>
 
   <script>
     const plantToNumbers = {"井土": ["1", "2", "3", "4", "101", "102", "103", "104", "105"], "今岡金屋": ["1", "2", "3", "4", "5", "6", "7", "101", "102", "103", "104"], "千原": ["1", "2", "3", "101", "102", "103"], "千谷": ["1", "2", "3", "4", "5", "101", "102", "103"], "歌長": ["1", "2", "101", "102"], "湯": ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "101"], "竹田": ["1", "2", "3", "4", "101", "102", "103", "104"], "細田": ["1", "101", "102"], "鐘尾": ["1", "2", "3", "4", "5", "6", "7", "101", "102"]};
@@ -4409,7 +4409,17 @@
       localStorage.setItem('pumpData', JSON.stringify(saved));
       alert("保存しました！");
       form.reset();
-      showHistory();
+      
+    showHistory();
+    function editEntry(index) {
+      const saved = JSON.parse(localStorage.getItem('pumpData') || '[]');
+      const entry = saved[index];
+      Object.keys(entry).forEach(k => {
+        if (form.elements[k] && k !== 'timestamp') form.elements[k].value = entry[k];
+      });
+      deleteEntry(index);
+    }
+    
     });
 
     function showHistory() {
@@ -4419,6 +4429,7 @@
         const div = document.createElement('div');
         div.className = 'entry';
         div.innerHTML = `
+          <button onclick="editEntry(${i})">編集</button> 
           <strong>${entry.timestamp}</strong><br>
           ポンプ場: ${entry.plant} / 号数: ${entry.number}<br>
           No.1 - 電流: ${entry.amp1}, 積算: ${entry.total1}, 抵抗: ${entry.res1}, 備考: ${entry.note1}<br>
@@ -4433,7 +4444,17 @@
       const saved = JSON.parse(localStorage.getItem('pumpData') || '[]');
       saved.splice(index, 1);
       localStorage.setItem('pumpData', JSON.stringify(saved));
-      showHistory();
+      
+    showHistory();
+    function editEntry(index) {
+      const saved = JSON.parse(localStorage.getItem('pumpData') || '[]');
+      const entry = saved[index];
+      Object.keys(entry).forEach(k => {
+        if (form.elements[k] && k !== 'timestamp') form.elements[k].value = entry[k];
+      });
+      deleteEntry(index);
+    }
+    
     }
 
     function downloadCSV() {
@@ -4454,7 +4475,17 @@
       URL.revokeObjectURL(url);
     }
 
+    
     showHistory();
+    function editEntry(index) {
+      const saved = JSON.parse(localStorage.getItem('pumpData') || '[]');
+      const entry = saved[index];
+      Object.keys(entry).forEach(k => {
+        if (form.elements[k] && k !== 'timestamp') form.elements[k].value = entry[k];
+      });
+      deleteEntry(index);
+    }
+    
   </script>
 </body>
 </html>
