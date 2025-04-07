@@ -188,7 +188,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  function editEntry(index) {
+  window.editEntry = function(index) {
     const entries = JSON.parse(localStorage.getItem("entries") || "[]");
     const entry = entries[index];
     Object.keys(entry).forEach(key => {
@@ -205,21 +205,21 @@ document.addEventListener("DOMContentLoaded", () => {
     updateHistory();
   }
 
-  function deleteEntry(index) {
+  window.deleteEntry = function(index) {
     const entries = JSON.parse(localStorage.getItem("entries") || "[]");
     entries.splice(index, 1);
     localStorage.setItem("entries", JSON.stringify(entries));
     updateHistory();
   }
 
-  function confirmDeleteAll() {
+  window.confirmDeleteAll = function() {
     if (confirm("本当に削除しますか？") && confirm("本当に本当に削除しますか？")) {
       localStorage.removeItem("entries");
       updateHistory();
     }
   }
 
-  function downloadCSV() {
+  window.downloadCSV = function() {
     const entries = JSON.parse(localStorage.getItem("entries") || "[]");
     let csv = "ポンプ場,号数,No.,電流値,積算,絶縁抵抗値,備考,電流値（定格）,判定（良／否）\n";
     entries.forEach(e => {
