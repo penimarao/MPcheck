@@ -4362,6 +4362,17 @@ document.addEventListener("DOMContentLoaded", function () {
     if (parseFloat(data.res1) <= 10) data.note1 = (data.note1 ? data.note1 + " / " : "") + "絶縁抵抗値低";
     if (parseFloat(data.res2) <= 10) data.note2 = (data.note2 ? data.note2 + " / " : "") + "絶縁抵抗値低";
 
+    
+    // 備考組み立て（統合版）
+    let notes = [];
+    if (parseFloat(data.res1) <= 10) notes.push("No.1絶縁低下");
+    if (parseFloat(data.res2) <= 10) notes.push("No.2絶縁低下");
+    if (data.sound1) notes.push("No.1異音");
+    if (data.sound2) notes.push("No.2異音");
+    if (data.scum) notes.push(`スカム（${data.scum}）`);
+    if (data.oil) notes.push(`油脂（${data.oil}）`);
+    data.note = notes.join(" ");
+
     data.timestamp = new Date().toLocaleString();
     saved.unshift(data);
     localStorage.setItem('pumpData', JSON.stringify(saved));
