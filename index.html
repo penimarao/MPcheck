@@ -216,9 +216,17 @@ function renderHistory() {
   const entries = [];
 
   for (let key in localStorage) {
+    if (key.endsWith("_time")) continue; // 時刻だけのキーは無視
     const d = JSON.parse(localStorage.getItem(key));
     if (!d || !d.plant) continue;
-    entries.push({ key, ...d, timestamp: localStorage.getItem(key + "_time") });
+
+    let timestamp = localStorage.getItem(key + "_time");
+    if (!timestamp) {
+      timestamp = Date.now();
+      localStorage.setItem(key + "_time", timestamp);  // 古いデータにもタイムスタンプを追加
+    }
+
+    entries.push({ key, ...d, timestamp });
   }
 
   // 新しい順に並び替え（timestampを使って降順）
@@ -226,8 +234,14 @@ function renderHistory() {
 
   entries.forEach(d => {
     count++;
+    const date = new Date(parseInt(d.timestamp));
+    const formatted = date.toLocaleString("ja-JP"); // 例：2025/4/8 14:30:00
+
     const div = document.createElement("div");
-    div.innerHTML = `[${d.plant} ${d.number}] No.1: ${d.amp1}A / ${d.sum1}h / ${d.res1}MΩ | No.2: ${d.amp2}A / ${d.sum2}h / ${d.res2}MΩ<br><span class='red'>${d.note}</span> ` +
+    div.innerHTML = `[${d.plant} ${d.number}]（${formatted}）<br>
+    No.1: ${d.amp1}A / ${d.sum1}h / ${d.res1}MΩ | 
+    No.2: ${d.amp2}A / ${d.sum2}h / ${d.res2}MΩ<br>
+    <span class='red'>${d.note}</span> ` +
       `<button class="btn-edit" onclick="editEntry('${d.key}')">編集</button> ` +
       `<button class="btn-delete" onclick="deleteEntry('${d.key}')">削除</button>`;
     list.appendChild(div);
