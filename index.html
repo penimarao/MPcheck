@@ -2,28 +2,23 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
-  <title>マンホール点検アプリ</title>
+  <title>点検アプリ完全版</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
-    body { font-family: sans-serif; padding: 20px; line-height: 1.6; }
+    body { font-family: sans-serif; padding: 20px; }
     select, input, button, textarea {
-      font-size: 18px;
+      font-size: 16px;
       margin: 5px 0;
       width: 100%;
       padding: 6px;
-      box-sizing: border-box;
     }
-    .pump-container { display: flex; flex-direction: row; justify-content: space-between; flex-wrap: nowrap; gap: 10px; }
-    .pump-box { border: 1px solid #ccc; padding: 10px; flex: 1; min-width: 48%; }
-    textarea { height: 60px; }
-    .section-title { font-weight: bold; margin-top: 20px; font-size: 20px; }
+    .pump-container { display: flex; justify-content: space-between; gap: 10px; }
+    .pump-box { flex: 1; border: 1px solid #ccc; padding: 10px; min-width: 45%; }
+    .section-title { font-weight: bold; margin-top: 20px; font-size: 18px; }
     .red { color: red; }
-    button { background: #007BFF; color: white; border: none; border-radius: 5px; }
-    button:hover { opacity: 0.9; }
   </style>
 </head>
 <body>
-
 <h2>点検フォーム</h2>
 
 <div>
@@ -42,85 +37,66 @@
   <div class="pump-box">
     <h3>No.1 ポンプ</h3>
     <label>電流値:</label><select id="amp1"></select>
-    <label>積算計:</label><select id="sum1"></select>
+    <label>積算:</label><select id="sum1"></select>
     <label>絶縁抵抗:</label><select id="res1" onchange="checkLowResistance(1)"></select>
     <label>異音:</label><input type="checkbox" id="noise1">
-    <label>スカム:</label>
-    <select id="scum1">
-      <option value="">選択</option>
-      <option value="スカム少">少</option>
-      <option value="スカム中">中</option>
-      <option value="スカム多">多</option>
-    </select>
-    <label>油脂:</label>
-    <select id="grease1">
-      <option value="">選択</option>
-      <option value="油脂少">少</option>
-      <option value="油脂中">中</option>
-      <option value="油脂多">多</option>
-    </select>
   </div>
 
   <div class="pump-box">
     <h3>No.2 ポンプ</h3>
     <label>電流値:</label><select id="amp2"></select>
-    <label>積算計:</label><select id="sum2"></select>
+    <label>積算:</label><select id="sum2"></select>
     <label>絶縁抵抗:</label><select id="res2" onchange="checkLowResistance(2)"></select>
     <label>異音:</label><input type="checkbox" id="noise2">
-    <label>スカム:</label>
-    <select id="scum2">
-      <option value="">選択</option>
-      <option value="スカム少">少</option>
-      <option value="スカム中">中</option>
-      <option value="スカム多">多</option>
-    </select>
-    <label>油脂:</label>
-    <select id="grease2">
-      <option value="">選択</option>
-      <option value="油脂少">少</option>
-      <option value="油脂中">中</option>
-      <option value="油脂多">多</option>
-    </select>
   </div>
 </div>
+
+<div class="section-title">スカム・油脂（共通）</div>
+<label>スカム:</label>
+<select id="scum">
+  <option value="">選択</option>
+  <option value="スカム少">少</option>
+  <option value="スカム中">中</option>
+  <option value="スカム多">多</option>
+</select>
+<label>油脂:</label>
+<select id="grease">
+  <option value="">選択</option>
+  <option value="油脂少">少</option>
+  <option value="油脂中">中</option>
+  <option value="油脂多">多</option>
+</select>
 
 <div class="section-title">備考</div>
 <textarea id="note" readonly></textarea>
 
 <div style="margin-top:20px;">
   <button onclick="saveData()">保存</button>
-  <button onclick="downloadCSV()" style="background:#6c757d;">CSVダウンロード</button>
-  <button onclick="confirmDeleteAll()" style="background:#dc3545;">すべて削除</button>
+  <button onclick="downloadCSV()">CSV出力</button>
+  <button onclick="confirmDeleteAll()">すべて削除</button>
 </div>
 
 <div class="section-title">履歴（<span id="entryCount">0</span>件）</div>
 <div id="historyList"></div>
 
 <script>
+
 const plantMap = {
   "歌長": ["1", "2", "101", "102"],
-
   "湯": ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "101"],
-
- "細田": ["1", "101", "102"],
-
-  "井土": ["1","2", "3", "4", "101", "102", "103", "104", "105"],
-
+  "細田": ["1", "101", "102"],
+  "井土": ["1", "2", "3", "4", "101", "102", "103", "104", "105"],
   "今岡金屋": ["1", "2", "3", "4", "5", "6", "7", "101", "102", "103", "104"],
-
   "竹田": ["1", "2", "3", "4", "101", "102", "103", "104"],
-
-  "千原": ["1", "2", "3“, "101", "102", "103"],
-
-  "鐘尾": ["1", "2", "3", "4", "5", "6", "7", "101", "102"]
-
-  "千谷": ["1", "2", "3", "4", "5", "101", "102", "103"],
-
+  "千原": ["1", "2", "3", "101", "102", "103"],
+  "鐘尾": ["1", "2", "3", "4", "5", "6", "7", "101", "102"],
+  "千谷": ["1", "2", "3", "4", "5", "101", "102", "103"]
 };
+
 
 function populateSelect(id, values) {
   const select = document.getElementById(id);
-  select.innerHTML = "";
+  select.innerHTML = "<option value='' disabled selected>選択してください</option>";
   values.forEach(v => {
     const opt = document.createElement("option");
     opt.value = v;
@@ -129,61 +105,51 @@ function populateSelect(id, values) {
   });
 }
 
-function setupDropdowns() {
-  populateSelect("plantSelect", Object.keys(plantMap));
-  updateNumbers();
-
-  const amps = [];
-  for (let i = 1.0; i <= 10.0; i += 0.1) amps.push(i.toFixed(1));
-  for (let i = 10.5; i <= 20.0; i += 0.5) amps.push(i.toFixed(1));
-  for (let i = 21; i <= 40; i++) amps.push(i.toString());
-  populateSelect("amp1", amps);
-  populateSelect("amp2", amps);
-
-  const sums = [];
-  for (let i = 0; i <= 200; i += 0.1) sums.push(i.toFixed(1));
-  populateSelect("sum1", sums);
-  populateSelect("sum2", sums);
-
-  const res = [">100"];
-  for (let i = 90; i >= 10; i -= 10) res.push(i.toString());
-  for (let i = 9; i >= 1; i--) res.push(i.toFixed(1));
-  for (let i = 1.0; i >= 0.1; i -= 0.1) res.push(i.toFixed(1));
-  for (let i = 0.09; i >= 0.01; i -= 0.01) res.push(i.toFixed(2));
-  populateSelect("res1", res);
-  populateSelect("res2", res);
-}
-
 function updateNumbers() {
   const plant = document.getElementById("plantSelect").value;
   populateSelect("numberSelect", plantMap[plant] || []);
 }
 
-function checkLowResistance(no) { updateNote(); }
+function setupDropdowns() {
+  populateSelect("plantSelect", Object.keys(plantMap));
+  const amps = [];
+  for (let i = 1.0; i <= 10.0; i += 0.1) amps.push(i.toFixed(1));
+  for (let i = 10.5; i <= 20.0; i += 0.5) amps.push(i.toFixed(1));
+  for (let i = 21; i <= 40; i++) amps.push(i.toString());
+  populateSelect("amp1", amps); populateSelect("amp2", amps);
+
+  const sums = [];
+  for (let i = 0; i <= 200; i += 0.1) sums.push(i.toFixed(1));
+  populateSelect("sum1", sums); populateSelect("sum2", sums);
+
+  const res = [">100", "90", "85", "80", "75", "70", "65", "60", "55", "50", "45", "40", "35", "30", "25", "20", "15", "10", "10", "9", "8", "7", "6", "5", "4", "3", "2", "1", "0.9", "0.8", "0.7", "0.6", "0.5", "0.4", "0.3", "0.2", "0.1", "0.10", "0.09", "0.08", "0.07", "0.06", "0.05", "0.04", "0.03", "0.02", "0.01"];
+  populateSelect("res1", res); populateSelect("res2", res);
+}
+
+function checkLowResistance() { updateNote(); }
 
 function updateNote() {
+  const res1 = parseFloat(document.getElementById("res1").value);
+  const res2 = parseFloat(document.getElementById("res2").value);
+  const noise1 = document.getElementById("noise1").checked;
+  const noise2 = document.getElementById("noise2").checked;
+  const scum = document.getElementById("scum").value;
+  const grease = document.getElementById("grease").value;
   let note = [];
-  for (let i = 1; i <= 2; i++) {
-    const res = parseFloat(document.getElementById("res" + i).value);
-    const noise = document.getElementById("noise" + i).checked;
-    const scum = document.getElementById("scum" + i).value;
-    const grease = document.getElementById("grease" + i).value;
-    let sub = [];
-    if (!isNaN(res) && res <= 10) sub.push(`No.${i}絶縁低下`);
-    if (noise) sub.push(`No.${i}異音`);
-    if (scum) sub.push(scum);
-    if (grease) sub.push(grease);
-    if (sub.length) note.push(sub.join("・"));
-  }
-  document.getElementById("note").value = note.join(" / ");
+  if (!isNaN(res1) && res1 <= 10) note.push("No.1絶縁低下");
+  if (!isNaN(res2) && res2 <= 10) note.push("No.2絶縁低下");
+  if (noise1) note.push("No.1異音");
+  if (noise2) note.push("No.2異音");
+  if (scum) note.push(scum);
+  if (grease) note.push(grease);
+  document.getElementById("note").value = note.join("・");
 }
 
 function saveData() {
-  const plant = document.getElementById("plantSelect").value;
-  const number = document.getElementById("numberSelect").value;
+  const plant = plantSelect.value;
+  const number = numberSelect.value;
   const key = `${plant}_${number}`;
   if (localStorage.getItem(key)) return alert("※登録済みです");
-
   const data = {
     plant, number,
     amp1: amp1.value, sum1: sum1.value, res1: res1.value,
@@ -203,12 +169,8 @@ function renderHistory() {
     if (!d || !d.plant) continue;
     count++;
     const div = document.createElement("div");
-    div.innerHTML = `[${d.plant} ${d.number}] ` +
-      `No.1: ${d.amp1}A / ${d.sum1}h / ${d.res1}MΩ | ` +
-      `No.2: ${d.amp2}A / ${d.sum2}h / ${d.res2}MΩ ` +
-      `<br>備考: <span class="${d.note.includes('絶縁低下') ? 'red' : ''}">${d.note}</span> ` +
-      `<button onclick="editEntry('${key}')">編集</button> ` +
-      `<button onclick="deleteEntry('${key}')">削除</button>`;
+    div.innerHTML = `[${d.plant} ${d.number}] No.1: ${d.amp1}A / ${d.sum1}h / ${d.res1}MΩ | No.2: ${d.amp2}A / ${d.sum2}h / ${d.res2}MΩ<Br><span class='red'>${d.note}</span> ` +
+                    `<button onclick="editEntry('${key}')">編集</button> <button onclick="deleteEntry('${key}')">削除</button>`;
     list.appendChild(div);
   }
   document.getElementById("entryCount").textContent = count;
@@ -261,6 +223,5 @@ setupDropdowns();
 setInterval(updateNote, 500);
 renderHistory();
 </script>
-
 </body>
 </html>
