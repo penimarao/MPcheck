@@ -217,15 +217,20 @@ function downloadCSV() {
   let csv = "ポンプ場,号数,ポンプNo,電流値,絶縁抵抗値,積算計,備考\n";
   for (let key in localStorage) {
     const d = JSON.parse(localStorage.getItem(key));
+    if (!d || !d.plant) continue;
     csv += `${d.plant},${d.number},No.1,${d.amp1},${d.res1},${d.sum1},${d.note}\n`;
     csv += `${d.plant},${d.number},No.2,${d.amp2},${d.res2},${d.sum2},${d.note}\n`;
   }
-  const blob = new Blob([csv], { type: "text/csv" });
+
+  const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
-  a.href = url;
-  a.download = "点検データ.csv";
+  a.setAttribute("href", url);
+  a.setAttribute("download", "点検データ.csv");
+  a.style.display = "none";
+  document.body.appendChild(a);
   a.click();
+  document.body.removeChild(a);
   URL.revokeObjectURL(url);
 }
 
