@@ -102,6 +102,9 @@
   <option value="油脂多">多</option>
 </select>
 
+<label>自由備考（手入力）:</label>
+<textarea id="freeNote" placeholder="例：マンホール周囲に落ち葉あり など…"></textarea>
+
 <div class="section-title">備考</div>
 <textarea id="note" readonly></textarea>
 
@@ -170,6 +173,8 @@ function updateNote() {
   const noise2 = document.getElementById("noise2").checked;
   const scum = document.getElementById("scum").value;
   const grease = document.getElementById("grease").value;
+  const free = document.getElementById("freeNote").value.trim();
+
   let note = [];
   if (!isNaN(res1) && res1 <= 10) note.push("No.1絶縁低下");
   if (!isNaN(res2) && res2 <= 10) note.push("No.2絶縁低下");
@@ -177,7 +182,11 @@ function updateNote() {
   if (noise2) note.push("No.2異音");
   if (scum) note.push(scum);
   if (grease) note.push(grease);
-  document.getElementById("note").value = note.join("・");
+
+  let combined = note.join("・");
+  if (free) combined += (combined ? " / " : "") + free;
+
+  document.getElementById("note").value = combined;
 }
 
 function saveData() {
