@@ -2,20 +2,33 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
-  <title>点検アプリ完全版</title>
+  <title>点検アプリ完全修正版</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
     body { font-family: sans-serif; padding: 20px; }
-    select, input, button, textarea {
+    select, input, textarea {
       font-size: 16px;
       margin: 5px 0;
       width: 100%;
       padding: 6px;
     }
-    .pump-container { display: flex; justify-content: space-between; gap: 10px; }
+    .pump-container { display: flex; gap: 10px; }
     .pump-box { flex: 1; border: 1px solid #ccc; padding: 10px; min-width: 45%; }
     .section-title { font-weight: bold; margin-top: 20px; font-size: 18px; }
     .red { color: red; }
+    button {
+      font-size: 16px;
+      padding: 10px 20px;
+      margin: 5px 5px 10px 0;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      color: white;
+    }
+    .btn-save { background-color: #28a745; }
+    .btn-download { background-color: #007bff; }
+    .btn-delete { background-color: #dc3545; }
+    button:hover { opacity: 0.85; }
   </style>
 </head>
 <body>
@@ -38,15 +51,14 @@
     <h3>No.1 ポンプ</h3>
     <label>電流値:</label><select id="amp1"></select>
     <label>積算:</label><select id="sum1"></select>
-    <label>絶縁抵抗:</label><select id="res1" onchange="checkLowResistance(1)"></select>
+    <label>絶縁抵抗:</label><select id="res1" onchange="checkLowResistance()"></select>
     <label>異音:</label><input type="checkbox" id="noise1">
   </div>
-
   <div class="pump-box">
     <h3>No.2 ポンプ</h3>
     <label>電流値:</label><select id="amp2"></select>
     <label>積算:</label><select id="sum2"></select>
-    <label>絶縁抵抗:</label><select id="res2" onchange="checkLowResistance(2)"></select>
+    <label>絶縁抵抗:</label><select id="res2" onchange="checkLowResistance()"></select>
     <label>異音:</label><input type="checkbox" id="noise2">
   </div>
 </div>
@@ -70,10 +82,10 @@
 <div class="section-title">備考</div>
 <textarea id="note" readonly></textarea>
 
-<div style="margin-top:20px;">
-  <button onclick="saveData()">保存</button>
-  <button onclick="downloadCSV()">CSV出力</button>
-  <button onclick="confirmDeleteAll()">すべて削除</button>
+<div>
+  <button class="btn-save" onclick="saveData()">保存</button>
+  <button class="btn-download" onclick="downloadCSV()">CSV出力</button>
+  <button class="btn-delete" onclick="confirmDeleteAll()">すべて削除</button>
 </div>
 
 <div class="section-title">履歴（<span id="entryCount">0</span>件）</div>
@@ -146,12 +158,10 @@ function updateNote() {
 }
 
 function saveData() {
-  const plant = plantSelect.value;
-  const number = numberSelect.value;
-  const key = `${plant}_${number}`;
+  const key = `${plantSelect.value}_${numberSelect.value}`;
   if (localStorage.getItem(key)) return alert("※登録済みです");
   const data = {
-    plant, number,
+    plant: plantSelect.value, number: numberSelect.value,
     amp1: amp1.value, sum1: sum1.value, res1: res1.value,
     amp2: amp2.value, sum2: sum2.value, res2: res2.value,
     note: note.value
@@ -169,7 +179,7 @@ function renderHistory() {
     if (!d || !d.plant) continue;
     count++;
     const div = document.createElement("div");
-    div.innerHTML = `[${d.plant} ${d.number}] No.1: ${d.amp1}A / ${d.sum1}h / ${d.res1}MΩ | No.2: ${d.amp2}A / ${d.sum2}h / ${d.res2}MΩ<Br><span class='red'>${d.note}</span> ` +
+    div.innerHTML = `[${d.plant} ${d.number}] No.1: ${d.amp1}A / ${d.sum1}h / ${d.res1}MΩ | No.2: ${d.amp2}A / ${d.sum2}h / ${d.res2}MΩ<br><span class='red'>${d.note}</span> ` +
                     `<button onclick="editEntry('${key}')">編集</button> <button onclick="deleteEntry('${key}')">削除</button>`;
     list.appendChild(div);
   }
@@ -204,11 +214,11 @@ function confirmDeleteAll() {
 }
 
 function downloadCSV() {
-  let csv = "ポンプ場,号数,ポンプNo,電流値（測定値）,電流値（定格）,絶縁抵抗値（MΩ）,積算計（h）,判定（良／否）,備考\n";
+  let csv = "ポンプ場,号数,ポンプNo,電流値,絶縁抵抗値,積算計,備考\n";
   for (let key in localStorage) {
     const d = JSON.parse(localStorage.getItem(key));
-    csv += `${d.plant},${d.number},No.1,${d.amp1},,,${d.res1},${d.sum1},,${d.note}\n`;
-    csv += `${d.plant},${d.number},No.2,${d.amp2},,,${d.res2},${d.sum2},,${d.note}\n`;
+    csv += `${d.plant},${d.number},No.1,${d.amp1},${d.res1},${d.sum1},${d.note}\n`;
+    csv += `${d.plant},${d.number},No.2,${d.amp2},${d.res2},${d.sum2},${d.note}\n`;
   }
   const blob = new Blob([csv], { type: "text/csv" });
   const url = URL.createObjectURL(blob);
