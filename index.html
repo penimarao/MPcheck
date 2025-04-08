@@ -181,16 +181,30 @@ function updateNote() {
 }
 
 function saveData() {
-  const key = `${plantSelect.value}_${numberSelect.value}`;
-  if (localStorage.getItem(key)) return alert("※登録済みです");
+  const plant = plantSelect.value;
+  const number = numberSelect.value;
+  const key = `${plant}_${number}`;
+
+  if (!plant || !number) {
+    alert("ポンプ場と号数を選択してください");
+    return;
+  }
+
+  if (localStorage.getItem(key)) {
+    alert("※登録済みです");
+    return;
+  }
+
   const data = {
-    plant: plantSelect.value, number: numberSelect.value,
+    plant, number,
     amp1: amp1.value, sum1: sum1.value, res1: res1.value,
     amp2: amp2.value, sum2: sum2.value, res2: res2.value,
     note: note.value
   };
+
   localStorage.setItem(key, JSON.stringify(data));
-  localStorage.setItem(key + "_time", Date.now());  // タイムスタンプを別で保存
+  localStorage.setItem(key + "_time", Date.now().toString());  // ← ここで保存！
+
   renderHistory();
 }
 
