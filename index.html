@@ -190,6 +190,7 @@ function saveData() {
     note: note.value
   };
   localStorage.setItem(key, JSON.stringify(data));
+  localStorage.setItem(key + "_time", Date.now());  // タイムスタンプを別で保存
   renderHistory();
 }
 
@@ -197,16 +198,27 @@ function renderHistory() {
   const list = document.getElementById("historyList");
   list.innerHTML = "";
   let count = 0;
+
+  const entries = [];
+
   for (let key in localStorage) {
     const d = JSON.parse(localStorage.getItem(key));
     if (!d || !d.plant) continue;
+    entries.push({ key, ...d, timestamp: localStorage.getItem(key + "_time") });
+  }
+
+  // 新しい順に並び替え（timestampを使って降順）
+  entries.sort((a, b) => parseInt(b.timestamp) - parseInt(a.timestamp));
+
+  entries.forEach(d => {
     count++;
     const div = document.createElement("div");
     div.innerHTML = `[${d.plant} ${d.number}] No.1: ${d.amp1}A / ${d.sum1}h / ${d.res1}MΩ | No.2: ${d.amp2}A / ${d.sum2}h / ${d.res2}MΩ<br><span class='red'>${d.note}</span> ` +
-      `<button class="btn-edit" onclick="editEntry('${key}')">編集</button> ` +
-      `<button class="btn-delete" onclick="deleteEntry('${key}')">削除</button>`;
+      `<button class="btn-edit" onclick="editEntry('${d.key}')">編集</button> ` +
+      `<button class="btn-delete" onclick="deleteEntry('${d.key}')">削除</button>`;
     list.appendChild(div);
-  }
+  });
+
   document.getElementById("entryCount").textContent = count;
 }
 
@@ -237,24 +249,39 @@ function confirmDeleteAll() {
   }
 }
 
+const plantOrder = ["歌長", "湯", "細田", "井土", "今岡金屋", "竹田", "千原", "鐘尾", "千谷"];
+
 function downloadCSV() {
   let csv = "ポンプ場,号数,ポンプNo,電流値,絶縁抵抗値,積算計,備考\n";
+
+  const entries = [];
+
   for (let key in localStorage) {
+    if (key.endsWith("_time")) continue;
     const d = JSON.parse(localStorage.getItem(key));
     if (!d || !d.plant) continue;
+    entries.push(d);
+  }
+
+  // plantOrder に従ってソート
+  entries.sort((a, b) => {
+    const aIndex = plantOrder.indexOf(a.plant);
+    const bIndex = plantOrder.indexOf(b.plant);
+    if (aIndex !== bIndex) return aIndex - bIndex;
+    return parseInt(a.number) - parseInt(b.number);
+  });
+
+  entries.forEach(d => {
     csv += `${d.plant},${d.number},No.1,${d.amp1},${d.res1},${d.sum1},${d.note}\n`;
     csv += `${d.plant},${d.number},No.2,${d.amp2},${d.res2},${d.sum2},${d.note}\n`;
-  }
+  });
 
   const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
-  a.setAttribute("href", url);
-  a.setAttribute("download", "点検データ.csv");
-  a.style.display = "none";
-  document.body.appendChild(a);
+  a.href = url;
+  a.download = "点検データ.csv";
   a.click();
-  document.body.removeChild(a);
   URL.revokeObjectURL(url);
 }
 
