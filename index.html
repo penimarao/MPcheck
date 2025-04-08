@@ -29,6 +29,29 @@
     .btn-download { background-color: #007bff; }
     .btn-delete { background-color: #dc3545; }
     button:hover { opacity: 0.85; }
+    
+  .btn-edit {
+    background-color: #ffc107;  /* 黄色系 */
+    color: black;
+    border: none;
+    border-radius: 4px;
+    padding: 6px 12px;
+    margin-right: 5px;
+    cursor: pointer;
+  }
+
+  .btn-delete {
+    background-color: #dc3545;  /* 赤系 */
+    color: white;
+    border: none;
+    border-radius: 4px;
+    padding: 6px 12px;
+    cursor: pointer;
+  }
+
+  .btn-edit:hover, .btn-delete:hover {
+    opacity: 0.85;
+  }
   </style>
 </head>
 <body>
@@ -180,7 +203,8 @@ function renderHistory() {
     count++;
     const div = document.createElement("div");
     div.innerHTML = `[${d.plant} ${d.number}] No.1: ${d.amp1}A / ${d.sum1}h / ${d.res1}MΩ | No.2: ${d.amp2}A / ${d.sum2}h / ${d.res2}MΩ<br><span class='red'>${d.note}</span> ` +
-                    `<button onclick="editEntry('${key}')">編集</button> <button onclick="deleteEntry('${key}')">削除</button>`;
+      `<button class="btn-edit" onclick="editEntry('${key}')">編集</button> ` +
+      `<button class="btn-delete" onclick="deleteEntry('${key}')">削除</button>`;
     list.appendChild(div);
   }
   document.getElementById("entryCount").textContent = count;
