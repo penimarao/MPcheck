@@ -52,7 +52,14 @@
       <option value="スカム中">中</option>
       <option value="スカム多">多</option>
     </select>
-      </div>
+    <label>油脂:</label>
+    <select id="grease1">
+      <option value="">選択</option>
+      <option value="油脂少">少</option>
+      <option value="油脂中">中</option>
+      <option value="油脂多">多</option>
+    </select>
+  </div>
 
   <div class="pump-box">
     <h3>No.2 ポンプ</h3>
@@ -67,27 +74,18 @@
       <option value="スカム中">中</option>
       <option value="スカム多">多</option>
     </select>
-      </div>
+    <label>油脂:</label>
+    <select id="grease2">
+      <option value="">選択</option>
+      <option value="油脂少">少</option>
+      <option value="油脂中">中</option>
+      <option value="油脂多">多</option>
+    </select>
+  </div>
 </div>
 
 <div class="section-title">備考</div>
-<textarea id="note"
-<div class="section-title">スカム・油脂（共通）</div>
-<label>スカム:</label>
-<select id="scum">
-  <option value="">選択</option>
-  <option value="スカム少">少</option>
-  <option value="スカム中">中</option>
-  <option value="スカム多">多</option>
-</select>
-<label>油脂:</label>
-<select id="grease">
-  <option value="">選択</option>
-  <option value="油脂少">少</option>
-  <option value="油脂中">中</option>
-  <option value="油脂多">多</option>
-</select>
- readonly></textarea>
+<textarea id="note" readonly></textarea>
 
 <div style="margin-top:20px;">
   <button onclick="saveData()">保存</button>
@@ -100,16 +98,6 @@
 
 <script>
 const plantMap = {
-  "井土": ["1", "2", "3", "4", "101", "102", "103", "104", "105"],
-  "今岡金屋": ["1", "2", "3", "4", "5", "6", "7", "101", "102", "103", "104"],
-  "千原": ["1", "2", "3", "101", "102", "103"],
-  "千谷": ["1", "2", "3", "4", "5", "101", "102", "103"],
-  "歌長": ["1", "2", "101", "102"],
-  "湯": ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "101"],
-  "竹田": ["1", "2", "3", "4", "101", "102", "103", "104"],
-  "細田": ["1", "101", "102"],
-  "鐘尾": ["1", "2", "3", "4", "5", "6", "7", "101", "102"],
-};
   "井土": ["1", "101", "102", "103", "104", "105", "2", "3", "4"],
   "今岡金屋": ["1", "101", "102", "103", "104", "2", "3", "4", "5", "6", "7"],
   "千原": ["1", "101", "102", "103", "2", "3"],
@@ -123,7 +111,7 @@ const plantMap = {
 
 function populateSelect(id, values) {
   const select = document.getElementById(id);
-  select.innerHTML = "<option value=\"\" disabled selected>選択してください</option>";
+  select.innerHTML = "";
   values.forEach(v => {
     const opt = document.createElement("option");
     opt.value = v;
@@ -148,7 +136,8 @@ function setupDropdowns() {
   populateSelect("sum1", sums);
   populateSelect("sum2", sums);
 
-  const res = [">100", "90", "85", "80", "75", "70", "65", "60", "55", "50", "45", "40", "35", "30", "25", "20", "15", "10", "10", "9", "8", "7", "6", "5", "4", "3", "2", "1", "1.0", "0.9", "0.8", "0.7", "0.6", "0.5", "0.4", "0.3", "0.2", "0.1", "0.10", "0.09", "0.08", "0.07", "0.06", "0.05", "0.04", "0.03", "0.02", "0.01"];
+  const res = [">100"];
+  for (let i = 90; i >= 10; i -= 10) res.push(i.toString());
   for (let i = 9; i >= 5; i--) res.push(i.toString());
   for (let i = 4.9; i >= 1.1; i -= 0.1) res.push(i.toFixed(1));
   for (let i = 1.0; i >= 0.1; i -= 0.1) res.push(i.toFixed(1));
