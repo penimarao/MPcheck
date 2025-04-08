@@ -1,217 +1,284 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>点検フォーム</title>
+  <meta charset="UTF-8">
+  <title>マンホール点検アプリ</title>
   <style>
-    body { font-family: sans-serif; padding: 1em; }
-    select, input, textarea, button { font-size: 1.1em; margin: 0.3em 0; width: 100%; }
-    .row { display: flex; gap: 10px; flex-wrap: wrap; }
-    .column { flex: 1; min-width: 150px; }
-    .entry { border: 1px solid #ccc; padding: 8px; margin: 10px 0; }
-    .note { font-weight: bold; margin-top: 0.5em; }
+    body { font-family: sans-serif; padding: 20px; }
+    select, input, button, textarea { font-size: 16px; margin: 5px; }
+    .pump-container { display: flex; gap: 40px; }
+    .pump-box { border: 1px solid #ccc; padding: 10px; flex: 1; }
+    .section-title { font-weight: bold; margin-top: 20px; }
+    .red { color: red; }
   </style>
 </head>
 <body>
-  <h1>点検フォーム</h1>
-  <form id="form">
-    <label>ポンプ場:
-      <select id="plant" name="plant" required></select>
-    </label>
-    <label>号数:
-      <select id="number" name="number" required></select>
-    </label>
-    <div class="row">
-      <div class="column">
-        <h3>No.1ポンプ</h3>
-        電流値:<select name="amp1"></select>
-        積算計:<select name="sum1"></select>
-        絶縁抵抗:<select name="res1"></select>
-      </div>
-      <div class="column">
-        <h3>No.2ポンプ</h3>
-        電流値:<select name="amp2"></select>
-        積算計:<select name="sum2"></select>
-        絶縁抵抗:<select name="res2"></select>
-      </div>
-    </div>
-    <label><input type="checkbox" name="noise1"> No.1 異音あり</label>
-    <label><input type="checkbox" name="noise2"> No.2 異音あり</label><br/>
-    <label>スカム:
-      <select name="scum">
-        <option value="">未選択</option>
-        <option value="スカム(少)">少</option>
-        <option value="スカム(中)">中</option>
-        <option value="スカム(多)">多</option>
-      </select>
-    </label>
-    <label>油脂:
-      <select name="oil">
-        <option value="">未選択</option>
-        <option value="油脂(少)">少</option>
-        <option value="油脂(中)">中</option>
-        <option value="油脂(多)">多</option>
-      </select>
-    </label>
-    <label>備考自由記述:
-      <textarea name="noteFree" rows="2"></textarea>
-    </label>
-    <button type="submit">保存</button>
-    <button type="button" onclick="downloadCSV()">CSVダウンロード</button>
-    <button type="button" onclick="confirmDeleteAll()">すべて削除</button>
-  </form>
 
-  <h2>保存履歴</h2>
-  <div><strong>保存件数: <span id="counter">0</span> 件</strong></div>
-  <div id="history"></div>
+<h1>マンホール点検入力</h1>
+
+<div>
+  <label>ポンプ場：</label>
+  <select id="plantSelect" onchange="updateNumbers()"></select>
+
+  <label>号数：</label>
+  <select id="numberSelect"></select>
+</div>
+
+<div class="pump-container">
+  <!-- No.1ポンプ -->
+  <div class="pump-box">
+    <h3>No.1 ポンプ</h3>
+    <label>電流値：</label><select id="amp1"></select><br>
+    <label>積算：</label><select id="sum1"></select><br>
+    <label>絶縁抵抗：</label><select id="res1" onchange="checkLowResistance(1)"></select><br>
+    <label>異音：</label><input type="checkbox" id="noise1"><br>
+    <label>スカム：</label>
+    <select id="scum1">
+      <option value="">選択</option>
+      <option value="スカム少">少</option>
+      <option value="スカム中">中</option>
+      <option value="スカム多">多</option>
+    </select><br>
+    <label>油脂：</label>
+    <select id="grease1">
+      <option value="">選択</option>
+      <option value="油脂少">少</option>
+      <option value="油脂中">中</option>
+      <option value="油脂多">多</option>
+    </select><br>
+  </div>
+
+  <!-- No.2ポンプ -->
+  <div class="pump-box">
+    <h3>No.2 ポンプ</h3>
+    <label>電流値：</label><select id="amp2"></select><br>
+    <label>積算：</label><select id="sum2"></select><br>
+    <label>絶縁抵抗：</label><select id="res2" onchange="checkLowResistance(2)"></select><br>
+    <label>異音：</label><input type="checkbox" id="noise2"><br>
+    <label>スカム：</label>
+    <select id="scum2">
+      <option value="">選択</option>
+      <option value="スカム少">少</option>
+      <option value="スカム中">中</option>
+      <option value="スカム多">多</option>
+    </select><br>
+    <label>油脂：</label>
+    <select id="grease2">
+      <option value="">選択</option>
+      <option value="油脂少">少</option>
+      <option value="油脂中">中</option>
+      <option value="油脂多">多</option>
+    </select><br>
+  </div>
+</div>
+
+<div class="section-title">備考</div>
+<textarea id="note" rows="3" cols="80" readonly></textarea>
+
+<div style="margin-top:20px;">
+  <button onclick="saveData()">保存</button>
+  <button onclick="downloadCSV()">CSV出力</button>
+  <button onclick="confirmDeleteAll()">すべて削除</button>
+</div>
+
+<div class="section-title">履歴（<span id="entryCount">0</span>件）</div>
+<div id="historyList"></div>
 
 <script>
-const plantToNumbers = {
+const plantMap = {
   "歌長": ["1", "2", "101", "102"],
-  "湯": ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "101"],
-  "細田": ["1", "101", "102"],
-  "竹田": ["1", "2", "3", "4", "101", "102", "103", "104"],
-  "井土": ["1", "2", "3", "4", "101", "102", "103", "104", "105"],
-  "今岡金屋": ["1", "2", "3", "4", "5", "6", "7", "101", "102", "103", "104"],
-  "千原": ["1", "2", "3", "101", "102", "103"],
-  "鐘尾": ["1", "2", "3", "4", "5", "6", "7", "101", "102"],
-  "千谷": ["1", "2", "3", "4", "5", "101", "102", "103"]
+  "湯": ["1", "2"],
+  "細田": ["1"]
 };
 
-const plantSelect = document.getElementById('plant');
-const numberSelect = document.getElementById('number');
-Object.keys(plantToNumbers).forEach(plant => {
-  plantSelect.innerHTML += `<option value="${plant}">${plant}</option>`;
-});
-plantSelect.addEventListener("change", () => {
-  numberSelect.innerHTML = '<option value="">選択してください</option>';
-  plantToNumbers[plantSelect.value]?.forEach(num => {
-    numberSelect.innerHTML += `<option value="${num}">${num}</option>`;
+// 電流値・積算・絶縁抵抗の選択肢設定
+function populateSelect(id, values) {
+  const select = document.getElementById(id);
+  select.innerHTML = "";
+  values.forEach(v => {
+    const opt = document.createElement("option");
+    opt.value = v;
+    opt.textContent = v;
+    select.appendChild(opt);
   });
-});
+}
 
-function generateSteps(start, end, step) {
-  const arr = [];
-  for (let i = start; i <= end; i += step) {
-    arr.push(Number.isInteger(i) ? String(i) : i.toFixed(1));
+function setupDropdowns() {
+  // ポンプ場
+  const plantSelect = document.getElementById("plantSelect");
+  Object.keys(plantMap).forEach(p => {
+    const opt = document.createElement("option");
+    opt.value = p;
+    opt.textContent = p;
+    plantSelect.appendChild(opt);
+  });
+  updateNumbers();
+
+  // 電流値
+  const amps = [];
+  for (let i = 1.0; i <= 10.0; i += 0.1) amps.push(i.toFixed(1));
+  for (let i = 10.5; i <= 20.0; i += 0.5) amps.push(i.toFixed(1));
+  for (let i = 21; i <= 40; i += 1) amps.push(i.toString());
+  populateSelect("amp1", amps);
+  populateSelect("amp2", amps);
+
+  // 積算計
+  const sums = [];
+  for (let i = 0; i <= 200; i += 0.1) sums.push(i.toFixed(1));
+  populateSelect("sum1", sums);
+  populateSelect("sum2", sums);
+
+  // 絶縁抵抗値
+  const res = [">100"];
+  for (let i = 90; i >= 10; i -= 10) res.push(i.toString());
+  for (let i = 9; i >= 5; i--) res.push(i.toString());
+  for (let i = 4.9; i >= 1.1; i -= 0.1) res.push(i.toFixed(1));
+  for (let i = 1.0; i >= 0.1; i -= 0.1) res.push(i.toFixed(1));
+  for (let i = 0.09; i >= 0.01; i -= 0.01) res.push(i.toFixed(2));
+  populateSelect("res1", res);
+  populateSelect("res2", res);
+}
+
+// ポンプ場に応じて号数を変更
+function updateNumbers() {
+  const plant = document.getElementById("plantSelect").value;
+  const numbers = plantMap[plant] || [];
+  const numberSelect = document.getElementById("numberSelect");
+  numberSelect.innerHTML = "";
+  numbers.forEach(n => {
+    const opt = document.createElement("option");
+    opt.value = n;
+    opt.textContent = n;
+    numberSelect.appendChild(opt);
+  });
+}
+
+// 絶縁抵抗が10以下なら備考に自動記載
+function checkLowResistance(no) {
+  const res = parseFloat(document.getElementById("res" + no).value);
+  updateNote();
+}
+
+// 備考自動更新
+function updateNote() {
+  let note = [];
+  for (let i = 1; i <= 2; i++) {
+    const low = parseFloat(document.getElementById("res" + i).value) <= 10;
+    const noise = document.getElementById("noise" + i).checked;
+    const scum = document.getElementById("scum" + i).value;
+    const grease = document.getElementById("grease" + i).value;
+    let sub = [];
+    if (low) sub.push(`No.${i}絶縁低下`);
+    if (noise) sub.push(`No.${i}異音`);
+    if (scum) sub.push(scum);
+    if (grease) sub.push(grease);
+    if (sub.length > 0) note.push(sub.join("・"));
   }
-  return arr;
+  document.getElementById("note").value = note.join(" / ");
 }
 
-function generateResistances() {
-  const values = [">100"];
-  for (let i = 90; i >= 10; i -= 10) values.push(i);
-  for (let i = 9; i >= 5; i--) values.push(i);
-  for (let i = 4; i >= 1; i--) values.push(i);
-  for (let i = 0.9; i >= 0.1; i -= 0.1) values.push(i.toFixed(1));
-  for (let i = 0.09; i >= 0.01; i -= 0.01) values.push(i.toFixed(2));
-  return values;
+// 保存処理
+function saveData() {
+  const plant = document.getElementById("plantSelect").value;
+  const number = document.getElementById("numberSelect").value;
+  const key = `${plant}_${number}`;
+  const existing = localStorage.getItem(key);
+  if (existing) {
+    alert("※登録済みです");
+    return;
+  }
+
+  const data = {
+    plant, number,
+    amp1: document.getElementById("amp1").value,
+    sum1: document.getElementById("sum1").value,
+    res1: document.getElementById("res1").value,
+    amp2: document.getElementById("amp2").value,
+    sum2: document.getElementById("sum2").value,
+    res2: document.getElementById("res2").value,
+    note: document.getElementById("note").value
+  };
+  localStorage.setItem(key, JSON.stringify(data));
+  renderHistory();
 }
 
-["amp1","amp2"].forEach(id =>
-  generateSteps(1.0,10.0,0.1).concat(generateSteps(10.5,20,0.5),generateSteps(21,40,1))
-  .forEach(v => document.getElementsByName(id)[0].innerHTML += `<option value="${v}">${v}</option>`)
-);
-
-["sum1","sum2"].forEach(id =>
-  generateSteps(0,200,0.1).forEach(v => document.getElementsByName(id)[0].innerHTML += `<option value="${v}">${v}</option>`)
-);
-
-["res1","res2"].forEach(id =>
-  generateResistances().forEach(v => document.getElementsByName(id)[0].innerHTML += `<option value="${v}">${v}</option>`)
-);
-
-function updateHistory() {
-  const entries = JSON.parse(localStorage.getItem('entries') || '[]');
-  document.getElementById('counter').textContent = entries.length;
-  const hist = document.getElementById('history');
-  hist.innerHTML = "";
-  entries.forEach((e, i) => {
+// 履歴表示
+function renderHistory() {
+  const list = document.getElementById("historyList");
+  list.innerHTML = "";
+  let count = 0;
+  for (let key in localStorage) {
+    if (!localStorage.hasOwnProperty(key)) continue;
+    const data = JSON.parse(localStorage.getItem(key));
+    if (!data || !data.plant) continue;
+    count++;
     const div = document.createElement("div");
-    div.className = "entry";
-    div.innerHTML = `
-      <b>${e.timestamp}</b><br>
-      ${e.plant} / ${e.number}<br>
-      No.1: ${e.amp1}A, ${e.sum1}, ${e.res1}<br>
-      No.2: ${e.amp2}A, ${e.sum2}, ${e.res2}<br>
-      <span class="note">備考: ${e.note}</span><br>
-      <button onclick="editEntry(${i})">編集</button>
-      <button onclick="deleteEntry(${i})">削除</button>
-    `;
-    hist.appendChild(div);
-  });
+    div.innerHTML = `[${data.plant} ${data.number}] ` +
+      `No.1: ${data.amp1}A / ${data.sum1}h / ${data.res1}MΩ | ` +
+      `No.2: ${data.amp2}A / ${data.sum2}h / ${data.res2}MΩ ` +
+      `<br>備考: <span class="${data.note.includes('絶縁低下') ? 'red' : ''}">${data.note}</span> ` +
+      `<button onclick="editEntry('${key}')">編集</button> ` +
+      `<button onclick="deleteEntry('${key}')">削除</button>`;
+    list.appendChild(div);
+  }
+  document.getElementById("entryCount").textContent = count;
 }
 
-function deleteEntry(i) {
-  if (!confirm("本当に削除しますか？")) return;
-  const entries = JSON.parse(localStorage.getItem('entries'));
-  entries.splice(i, 1);
-  localStorage.setItem('entries', JSON.stringify(entries));
-  updateHistory();
+// 編集機能
+function editEntry(key) {
+  const data = JSON.parse(localStorage.getItem(key));
+  if (!data) return;
+  document.getElementById("plantSelect").value = data.plant;
+  updateNumbers();
+  document.getElementById("numberSelect").value = data.number;
+  document.getElementById("amp1").value = data.amp1;
+  document.getElementById("sum1").value = data.sum1;
+  document.getElementById("res1").value = data.res1;
+  document.getElementById("amp2").value = data.amp2;
+  document.getElementById("sum2").value = data.sum2;
+  document.getElementById("res2").value = data.res2;
+  document.getElementById("note").value = data.note;
+  localStorage.removeItem(key);
+  renderHistory();
 }
 
-function editEntry(i) {
-  const e = JSON.parse(localStorage.getItem('entries'))[i];
-  plantSelect.value = e.plant;
-  plantSelect.dispatchEvent(new Event('change'));
-  setTimeout(() => numberSelect.value = e.number, 50);
-  ["amp1","sum1","res1","amp2","sum2","res2"].forEach(id => form[id].value = e[id]);
-  ["noise1","noise2"].forEach(n => form[n].checked = e[n]);
-  form.scum.value = e.scum;
-  form.oil.value = e.oil;
-  form.noteFree.value = e.noteFree;
-  const entries = JSON.parse(localStorage.getItem('entries'));
-  entries.splice(i, 1);
-  localStorage.setItem('entries', JSON.stringify(entries));
-  updateHistory();
-}
-
-form.addEventListener("submit", e => {
-  e.preventDefault();
-  const data = Object.fromEntries(new FormData(form).entries());
-  const entries = JSON.parse(localStorage.getItem('entries') || '[]');
-  if (entries.some(e => e.plant === data.plant && e.number === data.number)) return alert("※登録済みです");
-  const notes = [];
-  if (parseFloat(data.res1) <= 10) notes.push("No.1絶縁低下");
-  if (parseFloat(data.res2) <= 10) notes.push("No.2絶縁低下");
-  if (form.noise1.checked) notes.push("No.1異音");
-  if (form.noise2.checked) notes.push("No.2異音");
-  if (data.scum) notes.push(data.scum);
-  if (data.oil) notes.push(data.oil);
-  if (data.noteFree) notes.push(data.noteFree);
-  data.note = notes.join(" ");
-  data.timestamp = new Date().toLocaleString();
-  entries.push(data);
-  localStorage.setItem('entries', JSON.stringify(entries));
-  form.reset();
-  updateHistory();
-});
-
-function confirmDeleteAll() {
-  if (confirm("本当にすべて削除しますか？") && confirm("本当に本当に削除しますか？")) {
-    localStorage.removeItem('entries');
-    updateHistory();
+// 削除機能（1回確認）
+function deleteEntry(key) {
+  if (confirm("本当に削除しますか？")) {
+    localStorage.removeItem(key);
+    renderHistory();
   }
 }
 
-function downloadCSV() {
-  const entries = JSON.parse(localStorage.getItem('entries') || '[]');
-  let csv = "ポンプ場,号数,No,電流値,積算,絶縁抵抗,備考,電流値（定格）,判定（良／否）
-";
-  entries.forEach(e => {
-    csv += `${e.plant},${e.number},No.1,${e.amp1},${e.sum1},${e.res1},${e.note},,
-`;
-    csv += `${e.plant},${e.number},No.2,${e.amp2},${e.sum2},${e.res2},,,
-`;
-  });
-  const blob = new Blob(["﻿" + csv], { type: "text/csv" });
-  const link = document.createElement("a");
-  link.href = URL.createObjectURL(blob);
-  link.download = "tenken_data.csv";
-  link.click();
+// 全削除（2回確認）
+function confirmDeleteAll() {
+  if (confirm("すべてのデータを削除しますか？") && confirm("本当に削除しますか？")) {
+    localStorage.clear();
+    renderHistory();
+  }
 }
-updateHistory();
+
+// CSV出力
+function downloadCSV() {
+  let csv = "ポンプ場,号数,ポンプNo,電流値（測定値）,電流値（定格）,絶縁抵抗値（MΩ）,積算計（h）,判定（良／否）,備考\n";
+  for (let key in localStorage) {
+    const d = JSON.parse(localStorage.getItem(key));
+    if (!d) continue;
+    csv += `${d.plant},${d.number},No.1,${d.amp1},,,${d.res1},${d.sum1},,${d.note}\n`;
+    csv += `${d.plant},${d.number},No.2,${d.amp2},,,${d.res2},${d.sum2},,${d.note}\n`;
+  }
+  const blob = new Blob([csv], { type: "text/csv" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "点検データ.csv";
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+setupDropdowns();
+setInterval(updateNote, 500);
+renderHistory();
 </script>
 </body>
 </html>
